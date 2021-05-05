@@ -5,14 +5,14 @@
 To access the API get **access token** from **microsoft identity platform** .
 
 Send a POST request at    **/login/**   
-```json
+```javascript
 with Header = {
-    "Authorization" : "Bearer " + "access Token" }
+    "Authorization" : "Bearer " + Access Token }
 }
 ```
 
 You will recieve response : -  
-```json
+```javascript
 {  
     "username" : "Your microsoft email id",  
     "access token" : "Access token to be used for authentication here on",  
