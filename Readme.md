@@ -7,7 +7,7 @@ To access the API get **access token** from **microsoft identity platform** .
 Send a POST request at    **/login/**   
 ```javascript
 with Header = {
-    "Authorization" : "Bearer " + Access Token }
+    "Authorization" : Access Token }
 }
 ```
 
