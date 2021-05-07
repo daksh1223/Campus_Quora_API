@@ -20,7 +20,8 @@ from rest_framework_simplejwt import views as jwt_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include("categories.urls")),
+    path('api/categories/', include("categories.urls")),
+    path('api/user/', include("user.urls")),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(),
          name='token_refresh'),
 ]
