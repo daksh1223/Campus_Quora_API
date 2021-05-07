@@ -2,8 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated  
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import status
+from rest_framework import status,generics
 from .models import *
+from .serializers import *
 import requests
 import json
 # Create your views here.
@@ -36,8 +37,7 @@ class MicrosoftView(APIView):
         return Response(response)
 
 
-class Category_list(APIView):        
-    permission_classes = (IsAuthenticated,)
-    def get(self, request):
-        content = {'message': 'Hello, World!'}
-        return Response(content)
+class Category_list(generics.ListAPIView):
+     permission_classes = (IsAuthenticated,)        
+     queryset=category.objects.all()
+     serializer_class=category_serializer
