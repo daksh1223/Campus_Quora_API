@@ -10,17 +10,20 @@ class user_serializer(serializers.ModelSerializer):
 
 
 class Answer_serializer(serializers.ModelSerializer):
+    writer=user_serializer()
     class Meta:
         model = Post
         fields = "__all__"
 
 
 class Question_serializer(serializers.ModelSerializer):
+    user=user_serializer()
     class Meta:
         model=Question
-        fields='__all__'
+        fields="__all__"
 
 class Category_serializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields='__all__'
+
