@@ -1,10 +1,18 @@
+import requests
+import json
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated  
+
+
 from .models import *
-import requests
-import json
+from .serializers import *
+from categories.models import *
+from categories.serializers import *
+
 # Create your views here.
 
 
@@ -34,3 +42,19 @@ class MicrosoftView(APIView):
         response['access_token'] = str(token.access_token)
         response['refresh_token'] = str(token)
         return Response(response)
+
+class profile(APIView):
+     permission_classes=(IsAuthenticated,)
+     def get(self,request,user_id):
+          user=User.objects.get(pk=user_id)
+          questions=Question.objects.all().filter(user=user)
+          answers=Post.objects.all().filter(writer=user)
+          serialized_user=user_serializer(user)
+          serialized_questions=Question_serializer(questions,many=True)
+          serialzed_answers=Answer_serializer(answers,many=True)
+          
+          response={}
+          response['user']=serialized_user.data
+          response['questions']=serialized_questions.data
+          response['answers']=serialzed_answers.data
+          return Response(response,status=status.HTTP_200_OK)

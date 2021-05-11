@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.deletion import CASCADE
 # Create your models here.
 
 class Comment(models.Model):
@@ -7,7 +8,6 @@ class Comment(models.Model):
      comment=models.TextField()
      def __str__(self):
          return self.comment[0:50]
-
 
 class Post(models.Model):
     post = models.TextField()

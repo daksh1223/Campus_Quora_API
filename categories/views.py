@@ -1,10 +1,15 @@
+from django.db.models import manager
 from django.db.models.query_utils import Q
+from django.http.response import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated  
 from rest_framework import status
+
 from .models import *
 from .serializers import *
+from user.serializers import *
+
 # Create your views here.
 class Category_list(APIView):
      permission_classes = (IsAuthenticated,)  
@@ -112,12 +117,14 @@ class AnswerDetails(APIView):
         
         if 'like' in request.data:
              user=request.user
-             if(user not in answer.like.all()):
+             if user not in answer.like.all():
                   answer.like.add(user)
                   serializer=Answer_serializer(answer)
                   return Response(serializer.data, status= status.HTTP_200_OK)
              else:
-                  return Response({"error":"User has already liked the post once!"}, status=status.HTTP_400_BAD_REQUEST)
+                  answer.like.remove(user)
+                  serializer=Answer_serializer(answer)
+                  return Response(serializer.data,status= status.HTTP_200_OK)
         return Response({"error": "No value provided!!"}, status=status.HTTP_400_BAD_REQUEST)
      
      def delete(self,request,answer_id,question_id,category_id):
@@ -129,5 +136,54 @@ class AnswerDetails(APIView):
           return Response({"error":"Permission Denied!"}, status=status.HTTP_400_BAD_REQUEST)
         
   
+class Comments(APIView):
+     permission_classes=(IsAuthenticated,)
+     def get(self,request,answer_id,question_id, category_id):
+          answer=Post.objects.get(pk=answer_id)
+          comments=answer.comment.all()
+          serializer=comment_serializer(comments,many=True)
+          return Response(serializer.data,status=status.HTTP_200_OK)
+     
+     def post(self,request,answer_id,question_id, category_id):
+          answer=Post.objects.get(pk=answer_id)
+          if 'comment'in request.data and len(request.data['comment']):
+               comment=Comment.objects.create(comment=request.data['comment'],user=request.user)
+               serializer=comment_serializer(comment)
+               return Response(serializer.data,status=status.HTTP_201_CREATED)
+          return Response({"error":"No value Provided!"}, status=status.HTTP_400_BAD_REQUEST)
 
-        
+class CommentDetails(APIView):
+     permission_classes=(IsAuthenticated,)
+     def get(self,request,comment_id,answer_id,question_id, category_id):   
+          comment=Comment.objects.get(pk=comment_id)
+          serializer=comment_serializer(comment)
+          return Response(serializer.data,status=status.HTTP_200_OK)
+     def put(self,request,comment_id,answer_id,question_id, category_id):
+          comment=Comment.objects.get(pk=comment_id)
+          if 'comment' in request.data and len(request.data['comment']):
+             if request.user==comment.user:
+               comment.comment=request.data['comment']
+               comment.save()
+               serializer=comment_serializer(comment)
+               return Response(serializer.data,status=status.HTTP_200_OK)
+             else:
+                return Response({"error":"Permission Denied!"}, status=status.HTTP_400_BAD_REQUEST)
+          else:
+                return Response({"error":"No value provided!"}, status=status.HTTP_400_BAD_REQUEST)
+
+     def delete(self,request,comment_id,answer_id,question_id, category_id):
+       comment=Comment.objects.get(pk=comment_id)
+       if request.user==comment.user:
+          comment.delete()
+          return Response({"message":"Successfully Deleted!"}, status=status.HTTP_200_OK)
+       else:
+          return Response({"error":"Permission Denied!"}, status=status.HTTP_400_BAD_REQUEST)
+
+class Likes(APIView):
+     permission_classes=(IsAuthenticated,)
+     def get(self,request,answer_id,question_id, category_id):   
+          answer=Post.objects.get(pk=answer_id)
+          likes=answer.like.all()
+          serializer=user_serializer(likes,many=True)
+          return Response(serializer.data,status=status.HTTP_200_OK)
+     
