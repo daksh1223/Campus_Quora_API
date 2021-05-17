@@ -24,19 +24,19 @@ class Questions(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, category_id):
-        category = Category.objects.get(pk=category_id)
+        category = Category.objects.get(pk = category_id)
         queryset = category.questions.all()
         serializer = Question_serializer(queryset, many=True)
         return Response(serializer.data)
     
     def post(self, request,category_id):
-        category = Category.objects.get(pk=category_id)
+        category = Category.objects.get(pk = category_id)
         if 'question' in request.data and len(request.data['question']):
             question = Question.objects.create(user = request.user,  question = request.data['question'])
             category.questions.add(question)
             serializer = Question_serializer(question)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response({"error":"No question provided!!"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status = status.HTTP_201_CREATED)
+        return Response({"error":"No question provided!!"}, status = status.HTTP_400_BAD_REQUEST)
     
         
 
@@ -44,146 +44,138 @@ class Answers(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self,request,question_id, category_id):
-        question = Question.objects.get(pk=question_id)
+        question = Question.objects.get(pk = question_id)
         queryset = question.post.all()
         serializer = Answer_serializer(queryset, many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        return Response(serializer.data,status = status.HTTP_200_OK)
 
     def post(self, request,question_id,category_id):
         if 'post' in request.data and len(request.data['post']) :
-            question = Question.objects.get(pk=question_id)
-            post = Post.objects.create(post=request.data['post'],writer = request.user)
+            question = Question.objects.get(pk = question_id)
+            post = Post.objects.create(post = request.data['post'],writer = request.user)
             question.post.add(post)
             serializer = Answer_serializer(post)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response({"error": "No post provided!!"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status = status.HTTP_201_CREATED)
+        return Response({"error": "No post provided!!"}, status = status.HTTP_400_BAD_REQUEST)
 
 class QuestionDetails(APIView):
      permission_classes=(IsAuthenticated,)
 
      def get(self,request,question_id,category_id):
-          question = Question.objects.get(pk=question_id)
+          question = Question.objects.get(pk = question_id)
           serializer = Question_serializer(question)
           return Response(serializer.data)
      
      def put(self,request,question_id,category_id):
-       question=Question.objects.get(pk=question_id)
-       if question.user==request.user:         
+       question = Question.objects.get(pk = question_id)
+       if question.user == request.user:         
           if 'question' in request.data and len(request.data['question']):
-               question.question=request.data['question']
+               question.question = request.data['question']
                question.save()
-               serializer=Question_serializer(question)
-               return Response(serializer.data,status=status.HTTP_200_OK)
-          return Response({"error": "No value provided !!"}, status=status.HTTP_400_BAD_REQUEST)
+               serializer = Question_serializer(question)
+               return Response(serializer.data,status = status.HTTP_200_OK)
+          return Response({"error": "No value provided !!"}, status = status.HTTP_400_BAD_REQUEST)
        else:
-            return Response({"error":"Permission Denied!"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error":"Permission Denied!"}, status = status.HTTP_400_BAD_REQUEST)
 
      def delete(self,request,question_id,category_id):   
-      question=Question.objects.get(pk=question_id)
-      if question.user==request.user:
+      question = Question.objects.get(pk = question_id)
+      if question.user == request.user:
           question.delete()
-          return Response({"Message":"Successfully Deleted!"}, status=status.HTTP_200_OK)
+          return Response({"Message":"Successfully Deleted!"}, status = status.HTTP_200_OK)
       else:
-          return Response({"error":"Permission Denied!"}, status=status.HTTP_400_BAD_REQUEST)
+          return Response({"error":"Permission Denied!"}, status = status.HTTP_400_BAD_REQUEST)
        
 
 class AnswerDetails(APIView):
-     permission_classes=(IsAuthenticated,)
+     permission_classes = (IsAuthenticated,)
 
      def get(self,request,answer_id,question_id, category_id):
-        answer=Post.objects.get(pk=answer_id)
+        answer = Post.objects.get(pk = answer_id)
         serializer = Answer_serializer(answer)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        return Response(serializer.data,status = status.HTTP_200_OK)
 
      def post(self, request,answer_id,question_id,category_id):
           if 'comment' in request.data and len(request.data['comment']):
-               answer=Post.objects.get(pk=answer_id)
-               comment=Comment.objects.create(user=request.user,comment=request.data['comment'])
+               answer = Post.objects.get(pk = answer_id)
+               comment = Comment.objects.create(user = request.user,comment = request.data['comment'])
                answer.comment.add(comment)
-               serializer=Answer_serializer(answer)
-               return Response(serializer.data,status=status.HTTP_201_CREATED)
-          return Response({"error":"No value Provided!"},status=status.HTTP_400_BAD_REQUEST)
+               serializer = Answer_serializer(answer)
+               return Response(serializer.data,status = status.HTTP_201_CREATED)
+          return Response({"error":"No value Provided!"},status = status.HTTP_400_BAD_REQUEST)
 
      def put(self, request,answer_id,question_id,category_id):
-        answer=Post.objects.get(pk=answer_id)
+        answer = Post.objects.get(pk = answer_id)
         if 'post' in request.data and len(request.data['post']) :
-          if answer.writer==request.user:  
-            answer.post=request.data['post']
+          if answer.writer == request.user:  
+            answer.post = request.data['post']
             answer.save()
             serializer = Answer_serializer(answer)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status = status.HTTP_200_OK)
           else:
-               return Response({"error":"Permission Denied!"}, status=status.HTTP_400_BAD_REQUEST)
+               return Response({"error":"Permission Denied!"}, status = status.HTTP_400_BAD_REQUEST)
         
         if 'like' in request.data:
-             user=request.user
+             user = request.user
              if user not in answer.like.all():
                   answer.like.add(user)
-                  serializer=Answer_serializer(answer)
-                  return Response(serializer.data, status= status.HTTP_200_OK)
+                  serializer = Answer_serializer(answer)
+                  return Response(serializer.data, status = status.HTTP_200_OK)
              else:
                   answer.like.remove(user)
-                  serializer=Answer_serializer(answer)
-                  return Response(serializer.data,status= status.HTTP_200_OK)
-        return Response({"error": "No value provided!!"}, status=status.HTTP_400_BAD_REQUEST)
+                  serializer = Answer_serializer(answer)
+                  return Response(serializer.data,status = status.HTTP_200_OK)
+        return Response({"error": "No value provided!!"}, status = status.HTTP_400_BAD_REQUEST)
      
      def delete(self,request,answer_id,question_id,category_id):
-       answer=Post.objects.get(pk=answer_id)   
-       if answer.writer==request.user:  
+       answer = Post.objects.get(pk = answer_id)   
+       if answer.writer == request.user:  
           answer.delete()
-          return Response({"Message":"Successfully Deleted!"}, status=status.HTTP_200_OK)
+          return Response({"Message":"Successfully Deleted!"}, status = status.HTTP_200_OK)
        else:
-          return Response({"error":"Permission Denied!"}, status=status.HTTP_400_BAD_REQUEST)
+          return Response({"error":"Permission Denied!"}, status = status.HTTP_400_BAD_REQUEST)
         
   
 class Comments(APIView):
-     permission_classes=(IsAuthenticated,)
+     permission_classes = (IsAuthenticated,)
      def get(self,request,answer_id,question_id, category_id):
-          answer=Post.objects.get(pk=answer_id)
-          comments=answer.comment.all()
-          serializer=comment_serializer(comments,many=True)
-          return Response(serializer.data,status=status.HTTP_200_OK)
+          answer = Post.objects.get(pk = answer_id)
+          comments = answer.comment.all()
+          serializer = comment_serializer(comments,many=True)
+          return Response(serializer.data,status = status.HTTP_200_OK)
      
-     def post(self,request,answer_id,question_id, category_id):
-          answer=Post.objects.get(pk=answer_id)
-          if 'comment'in request.data and len(request.data['comment']):
-               comment=Comment.objects.create(comment=request.data['comment'],user=request.user)
-               serializer=comment_serializer(comment)
-               return Response(serializer.data,status=status.HTTP_201_CREATED)
-          return Response({"error":"No value Provided!"}, status=status.HTTP_400_BAD_REQUEST)
-
 class CommentDetails(APIView):
-     permission_classes=(IsAuthenticated,)
+     permission_classes = (IsAuthenticated,)
      def get(self,request,comment_id,answer_id,question_id, category_id):   
-          comment=Comment.objects.get(pk=comment_id)
-          serializer=comment_serializer(comment)
-          return Response(serializer.data,status=status.HTTP_200_OK)
+          comment = Comment.objects.get(pk = comment_id)
+          serializer = comment_serializer(comment)
+          return Response(serializer.data,status = status.HTTP_200_OK)
      def put(self,request,comment_id,answer_id,question_id, category_id):
-          comment=Comment.objects.get(pk=comment_id)
+          comment = Comment.objects.get(pk=comment_id)
           if 'comment' in request.data and len(request.data['comment']):
-             if request.user==comment.user:
-               comment.comment=request.data['comment']
+             if request.user == comment.user:
+               comment.comment = request.data['comment']
                comment.save()
-               serializer=comment_serializer(comment)
-               return Response(serializer.data,status=status.HTTP_200_OK)
+               serializer = comment_serializer(comment)
+               return Response(serializer.data,status = status.HTTP_200_OK)
              else:
-                return Response({"error":"Permission Denied!"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error":"Permission Denied!"}, status = status.HTTP_400_BAD_REQUEST)
           else:
-                return Response({"error":"No value provided!"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error":"No value provided!"}, status = status.HTTP_400_BAD_REQUEST)
 
      def delete(self,request,comment_id,answer_id,question_id, category_id):
-       comment=Comment.objects.get(pk=comment_id)
-       if request.user==comment.user:
+       comment=Comment.objects.get(pk = comment_id)
+       if request.user == comment.user:
           comment.delete()
-          return Response({"message":"Successfully Deleted!"}, status=status.HTTP_200_OK)
+          return Response({"message":"Successfully Deleted!"}, status = status.HTTP_200_OK)
        else:
-          return Response({"error":"Permission Denied!"}, status=status.HTTP_400_BAD_REQUEST)
+          return Response({"error":"Permission Denied!"}, status = status.HTTP_400_BAD_REQUEST)
 
 class Likes(APIView):
-     permission_classes=(IsAuthenticated,)
+     permission_classes = (IsAuthenticated,)
      def get(self,request,answer_id,question_id, category_id):   
-          answer=Post.objects.get(pk=answer_id)
-          likes=answer.like.all()
-          serializer=user_serializer(likes,many=True)
-          return Response(serializer.data,status=status.HTTP_200_OK)
+          answer = Post.objects.get(pk = answer_id)
+          likes = answer.like.all()
+          serializer = user_serializer(likes,many = True)
+          return Response(serializer.data,status = status.HTTP_200_OK)
      
