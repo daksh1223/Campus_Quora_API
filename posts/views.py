@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from .models import Community,Question
-from .serializers import CommunitySerializer
+from .serializers import *
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 import datetime
@@ -28,23 +28,29 @@ class QuestionView(APIView):
                 date =  datetime.date.today(),
                 user = user,
             )
+            comm_list = []
             for x in request.data["communities"]:
                 community = Community.objects.get(name= x)
                 print(community)
                 print(community.users.all())
                 if community.users.filter(username = user.username).exists():
-                    print("Exists")
-                    question.communities.add(user.id)
+                    comm_list.append(community)
                 else:
-                    return Response({"error": f"{user} not present in {community}"})
+                    return Response({"error": f"{user} not present in {community}"}, status= status.HTTP_401_UNAUTHORIZED)
             question.save()
-            return Response(question)
+            try:
+                question.communities.add(*comm_list)
+                serializer = QuestionSerializer(question)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except:
+                question.delete()
+                return Response({"error": "Unable to add communities to question!!"}, status=status.HTTP_400_BAD_REQUEST)
         except KeyError as e:
             print("Exception: ",type(e),e)
             return Response({"error": "Incomplete data!!"}, status=status.HTTP_400_BAD_REQUEST)
-        # except Exception as e:
-        #     print("Exception: ",type(e),e)
-        #     return Response({"error": "Question already exists or Server error!!"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print("Exception: ",type(e),e)
+            return Response({"error": "Question already exists or Server error!!"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # class TagList(APIView):

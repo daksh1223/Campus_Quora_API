@@ -7,7 +7,7 @@ class Community(models.Model):
     name = models.TextField(unique=True)
     users = models.ManyToManyField(User)
     def __str__(self):
-        return self.name
+        return f"id:{self.id} {self.name}"
 
 
 class Question(models.Model):
@@ -19,4 +19,4 @@ class Question(models.Model):
     class Meta:
         unique_together = ('title','content',)
     def __str__(self):
-        return f"{self.id} {self.title}"
+        return f"id:{self.id} {self.title}"
