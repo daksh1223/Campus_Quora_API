@@ -28,3 +28,11 @@ class Answer(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE)
     def __str__(self):
         return f"id:{self.id} {self.content[:30]}"
+
+class Comment(models.Model):
+    content = models.TextField()
+    date = models.DateField(default=datetime.date.today)
+    answer = models.ForeignKey(Answer,on_delete = models.CASCADE)
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    def __str__(self):
+        return f"id:{self.id} {self.content[:30]}"

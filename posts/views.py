@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from .models import Community,Question,Answer
+from .models import Community,Question,Answer,Comment
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -68,6 +68,33 @@ class AnswerView(APIView):
             )
             serializer = AnswerSerializer(answer)
             print(answer,is_created)
+            if not is_created:
+                return Response({"error":"Already exists","data":serializer.data},status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except KeyError as e:
+            print("Exception: ",type(e),e)
+            return Response({"error": "Incomplete data!!"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": ""}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,question_id):
+        return Response()
+    def post(self,request,question_id,answer_id):
+        try:
+            answer = Answer.objects.get(pk=answer_id)
+            comment,is_created = Comment.objects.get_or_create(
+                content=request.data['content'],
+                date = datetime.date.today(),
+                answer = answer,
+                user = request.user,
+            )
+            serializer = CommentSerializer(comment)
+            print(comment,is_created)
             if not is_created:
                 return Response({"error":"Already exists","data":serializer.data},status=status.HTTP_400_BAD_REQUEST)
             else:
