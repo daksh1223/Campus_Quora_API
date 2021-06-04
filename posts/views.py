@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from .models import Community,Question
+from .models import Community,Question,Answer
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -19,9 +19,8 @@ class QuestionView(APIView):
     def post(self,request):
         user = request.user
         try:
-            print(request.data["communities"])
-
-            print(user.community_set.all())
+            # print(request.data["communities"])
+            # print(user.community_set.all())
             question = Question(
                 title = request.data['title'],
                 content = request.data['content'],
@@ -52,6 +51,32 @@ class QuestionView(APIView):
             print("Exception: ",type(e),e)
             return Response({"error": "Question already exists or Server error!!"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class AnswerView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,question_id):
+        return Response()
+    def post(self,request,question_id):
+        try:
+            question = Question.objects.get(pk=question_id)
+            answer,is_created = Answer.objects.get_or_create(
+                content=request.data['content'],
+                date = datetime.date.today(),
+                question = question,
+                user = request.user,
+            )
+            serializer = AnswerSerializer(answer)
+            print(answer,is_created)
+            if not is_created:
+                return Response({"error":"Already exists","data":serializer.data},status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except KeyError as e:
+            print("Exception: ",type(e),e)
+            return Response({"error": "Incomplete data!!"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": ""}, status=status.HTTP_400_BAD_REQUEST)
 
 # class TagList(APIView):
 #     #  permission_classes = (IsAuthenticated,)  

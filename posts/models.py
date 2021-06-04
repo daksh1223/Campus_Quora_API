@@ -15,8 +15,16 @@ class Question(models.Model):
     content = models.TextField()
     date = models.DateField(default=datetime.date.today)
     communities = models.ManyToManyField(Community)
-    user = models.ForeignKey(User,models.CASCADE)
+    user = models.ForeignKey(User,on_delete = models.CASCADE)
     class Meta:
         unique_together = ('title','content',)
     def __str__(self):
         return f"id:{self.id} {self.title}"
+
+class Answer(models.Model):
+    content = models.TextField()
+    date = models.DateField(default=datetime.date.today)
+    question = models.ForeignKey(Question,on_delete = models.CASCADE)
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    def __str__(self):
+        return f"id:{self.id} {self.content[:30]}"
