@@ -10,8 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import *
 from .serializers import *
-from categories.models import *
-from categories.serializers import *
+from posts.models import *
+from posts.serializers import *
 
 # Create your views here.
 
